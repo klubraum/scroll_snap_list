@@ -116,7 +116,7 @@ class ScrollSnapList extends StatefulWidget {
     this.updateOnScroll,
     this.initialIndex,
     this.scrollDirection = Axis.horizontal,
-    this.dynamicItemSize = false,
+    this.dynamicItemSize = true,
     this.dynamicSizeEquation,
     this.dynamicItemOpacity,
   })  : listController = listController ?? ScrollController(),
@@ -283,7 +283,6 @@ class ScrollSnapListState extends State<ScrollSnapList> {
                   if (isInit) {
                     return true;
                   }
-
                   double tolerance =
                       widget.endOfListTolerance ?? (widget.itemSize / 2);
                   if (scrollInfo.metrics.pixels >=
@@ -308,6 +307,20 @@ class ScrollSnapListState extends State<ScrollSnapList> {
                       currentPixel = scrollInfo.metrics.pixels;
                     });
                   }
+                  //snap the selection
+                  double offset = _calcCardLocation(
+                    pixel: scrollInfo.metrics.pixels,
+                    itemSize: widget.itemSize,
+                  );
+                  if (100 <
+                          // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
+                          (widget.listController.position.activity.velocity)
+                              .abs() &&
+                      // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
+                      (widget.listController.position.activity.velocity).abs() <
+                          700) {
+                    _animateScroll(offset);
+                  }
 
                   if (widget.updateOnScroll == true) {
                     // dont snap until after first drag
@@ -329,7 +342,7 @@ class ScrollSnapListState extends State<ScrollSnapList> {
                 key: widget.listViewKey,
                 controller: widget.listController,
                 padding: widget.scrollDirection == Axis.horizontal
-                    ? EdgeInsets.symmetric(horizontal: _listPadding)
+                    ? EdgeInsets.symmetric(horizontal: 0)
                     : EdgeInsets.symmetric(
                         vertical: _listPadding,
                       ),
